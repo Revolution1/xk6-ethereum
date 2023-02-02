@@ -158,15 +158,17 @@ func registerMetrics(vu modules.VU) (ethMetrics, error) {
 
 func (c *Client) reportMetricsFromStats(call string, t time.Duration) {
 	now := time.Now()
-	tags := metrics.NewSampleTags(map[string]string{"call": call})
+	tags := (&metrics.TagSet{}).WithTagsFromMap(map[string]string{"call": call})
 	ctx := c.vu.Context()
 	metrics.PushIfNotDone(ctx, c.vu.State().Samples, metrics.ConnectedSamples{
 		Samples: []metrics.Sample{
 			{
-				Metric: c.metrics.RequestDuration,
-				Tags:   tags,
-				Value:  float64(t / time.Millisecond),
-				Time:   now,
+				TimeSeries: metrics.TimeSeries{
+					Metric: c.metrics.RequestDuration,
+					Tags:   tags,
+				},
+				Value: float64(t / time.Millisecond),
+				Time:  now,
 			},
 		},
 	})

@@ -191,10 +191,12 @@ func (c *Client) WaitForTransactionReceipt(hash string) *goja.Promise {
 					metrics.PushIfNotDone(c.vu.Context(), c.vu.State().Samples, metrics.ConnectedSamples{
 						Samples: []metrics.Sample{
 							{
-								Metric: c.metrics.TimeToMine,
-								Tags:   metrics.NewSampleTags(map[string]string{"vu": c.vu.State().Group.Name}),
-								Value:  float64(time.Since(now) / time.Millisecond),
-								Time:   time.Now(),
+								TimeSeries: metrics.TimeSeries{
+									Metric: c.metrics.TimeToMine,
+									Tags:   (&metrics.TagSet{}).WithTagsFromMap(map[string]string{"vu": c.vu.State().Group.Name}),
+								},
+								Value: float64(time.Since(now) / time.Millisecond),
+								Time:  time.Now(),
 							},
 						},
 					})
@@ -357,25 +359,27 @@ func (c *Client) pollForBlocks() {
 				metrics.PushIfNotDone(c.vu.Context(), c.vu.State().Samples, metrics.ConnectedSamples{
 					Samples: []metrics.Sample{
 						{
-							Metric: c.metrics.Block,
-							Tags: metrics.NewSampleTags(map[string]string{
-								"transactions": strconv.Itoa(len(block.TransactionsHashes)),
-								"gas_used":     strconv.Itoa(int(block.GasUsed)),
-								"gas_limit":    strconv.Itoa(int(block.GasLimit)),
-							}),
+							TimeSeries: metrics.TimeSeries{
+								Metric: c.metrics.Block,
+								Tags: (&metrics.TagSet{}).WithTagsFromMap(map[string]string{
+									"transactions": strconv.Itoa(len(block.TransactionsHashes)),
+									"gas_used":     strconv.Itoa(int(block.GasUsed)),
+									"gas_limit":    strconv.Itoa(int(block.GasLimit)),
+								})},
 							Value: float64(blockNumber),
 							Time:  time.Now(),
 						},
 						{
-							Metric: c.metrics.TPS,
-							Value:  tps,
-							Time:   time.Now(),
+							TimeSeries: metrics.TimeSeries{Metric: c.metrics.TPS},
+							Value:      tps,
+							Time:       time.Now(),
 						},
 						{
-							Metric: c.metrics.BlockTime,
-							Tags: metrics.NewSampleTags(map[string]string{
-								"block_timestamp_diff": blockTimestampDiff.String(),
-							}),
+							TimeSeries: metrics.TimeSeries{
+								Metric: c.metrics.BlockTime,
+								Tags: (&metrics.TagSet{}).WithTagsFromMap(map[string]string{
+									"block_timestamp_diff": blockTimestampDiff.String(),
+								})},
 							Value: float64(blockTime.Milliseconds()),
 							Time:  time.Now(),
 						},
