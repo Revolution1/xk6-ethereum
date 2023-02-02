@@ -1,4 +1,4 @@
-// xk6 build --with github.com/distribworks/xk6-ethereum=.
+// xk6 build --with github.com/revolution1/xk6-ethereum=.
 package ethereum
 
 import (
